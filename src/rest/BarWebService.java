@@ -37,7 +37,7 @@ public class BarWebService {
 
     }
 
-    public void addRecipe(String name, List<Integer> ingredients, List<Category> categories) {
+    public void addRecipe(String name, List<Integer> ingredientIds, List<Integer> categoryIds) {
 
     }
 

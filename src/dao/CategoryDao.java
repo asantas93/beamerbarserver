@@ -14,11 +14,11 @@ public class CategoryDao {
 
     }
 
-    public Category getById(Integer id) {
+    public Category getById(Integer categoryId) {
         return null;
     }
 
-    public List<Category> getByIds(List<Integer> ids) {
+    public List<Category> getByIds(List<Integer> categoryIds) {
         return null;
     }
 

@@ -38,11 +38,11 @@ public class IngredientDao {
         return null;
     }
 
-    public Ingredient getById(Integer id) {
+    public Ingredient getById(Integer ingedientId) {
         return null;
     }
 
-    public List<Ingredient> getByIds(List<Integer> ids) {
+    public List<Ingredient> getByIds(List<Integer> ingedientIds) {
         return null;
     }
 

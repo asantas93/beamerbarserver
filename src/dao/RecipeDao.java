@@ -1,7 +1,5 @@
 package dao;
 
-import model.Category;
-import model.Ingredient;
 import model.Recipe;
 
 import java.util.List;
@@ -9,7 +7,7 @@ import java.util.Map;
 
 public class RecipeDao {
 
-    public void addRecipe(String name, List<Category> categories, Map<Ingredient, Double> proportions) {
+    public void addRecipe(String name, List<Integer> categoryIds, Map<Integer, Double> proportions) {
 
     }
 
