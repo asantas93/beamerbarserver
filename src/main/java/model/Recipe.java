@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class Recipe {
 
-    private final Integer id;
+    private final Long id;
     private final String name;
     private final Double price;
     private final Map<Ingredient, Double> proportions;
@@ -14,7 +14,7 @@ public class Recipe {
     private final List<Category> categories;
     private final Boolean allIngredientsInStock;
 
-    public Recipe(Integer id, String name, List<Category> categories, Map<Ingredient, Double> proportions) {
+    public Recipe(Long id, String name, List<Category> categories, Map<Ingredient, Double> proportions) {
         this.id = id;
         this.name = name;
         this.proportions = proportions;
@@ -32,7 +32,7 @@ public class Recipe {
         this.allIngredientsInStock = outOfStockIngredients.isEmpty();
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 

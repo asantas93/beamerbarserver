@@ -11,15 +11,15 @@ import java.util.List;
  */
 public class BarAdminWebService extends BarWebService {
 
-    public void setIngredientInStock(Integer ingredientId) {
+    public void setIngredientInStock(Long ingredientId) {
 
     }
 
-    public void setIngredientOutOfStock(Integer ingredientId) {
+    public void setIngredientOutOfStock(Long ingredientId) {
 
     }
 
-    public void setIngredientPrice(Integer ingredientId, Double price) {
+    public void setIngredientPrice(Long ingredientId, Double price) {
 
     }
 
@@ -27,15 +27,15 @@ public class BarAdminWebService extends BarWebService {
 
     }
 
-    public void removeIngredient(Integer ingredientId) {
+    public void removeIngredient(Long ingredientId) {
 
     }
 
-    public void removeRecipe(Integer recipeId) {
+    public void removeRecipe(Long recipeId) {
 
     }
 
-    public void updateIngredientPrice(Integer ingredientId, Double price) {
+    public void updateIngredientPrice(Long ingredientId, Double price) {
 
     }
 
@@ -43,15 +43,15 @@ public class BarAdminWebService extends BarWebService {
 
     }
 
-    public void removeCategory(Integer categoryId) {
+    public void removeCategory(Long categoryId) {
 
     }
 
-    public void removeSuggestedIngredient(Integer ingedientId) {
+    public void removeSuggestedIngredient(Long ingedientId) {
 
     }
 
-    public void supplySuggestedIngredient(Integer ingedientId, Double pricePerUnit) {
+    public void supplySuggestedIngredient(Long ingedientId, Double pricePerUnit) {
 
     }
 

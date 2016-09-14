@@ -2,15 +2,15 @@ package model;
 
 public class Category {
 
-    private final Integer id;
+    private final Long id;
     private final String name;
 
-    public Category(Integer id, String name) {
+    public Category(Long id, String name) {
         this.id = id;
         this.name = name;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 

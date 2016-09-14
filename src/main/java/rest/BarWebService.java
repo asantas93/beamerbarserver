@@ -13,11 +13,11 @@ import java.util.List;
  */
 public class BarWebService {
 
-    public List<Recipe> getRecipesWithIngredient(Integer ingredientId) {
+    public List<Recipe> getRecipesWithIngredient(Long ingredientId) {
         return null;
     }
 
-    public List<Recipe> getRecipesWithCategory(Integer categoryId) {
+    public List<Recipe> getRecipesWithCategory(Long categoryId) {
         return null;
     }
 
@@ -33,11 +33,11 @@ public class BarWebService {
         return null;
     }
 
-    public void reportIngredientOutOfStock(Integer ingredientId) {
+    public void reportIngredientOutOfStock(Long ingredientId) {
 
     }
 
-    public void addRecipe(String name, List<Integer> ingredientIds, List<Integer> categoryIds) {
+    public void addRecipe(String name, List<Long> ingredientIds, List<Long> categoryIds) {
 
     }
 

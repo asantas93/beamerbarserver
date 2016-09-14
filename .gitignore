@@ -1,2 +1,4 @@
 .idea/
 beamerbarserver.iml
+src/main/resources/
+target/

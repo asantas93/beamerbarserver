@@ -10,11 +10,11 @@ public class SuggestedIngredientDao {
 
     }
 
-    public void removeSuggestedIngredient(Integer ingedientId) {
+    public void removeSuggestedIngredient(Long ingedientId) {
 
     }
 
-    public void supplySuggestedIngredient(Integer ingedientId, Double pricePerUnit) {
+    public void supplySuggestedIngredient(Long ingedientId, Double pricePerUnit) {
 
     }
 
