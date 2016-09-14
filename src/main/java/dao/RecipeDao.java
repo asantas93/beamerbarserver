@@ -5,7 +5,7 @@ import dao.rowmapper.RowMapper;
 import model.Recipe;
 
 import javax.inject.Inject;
-import java.sql.Connection;
+import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -16,12 +16,12 @@ import static dao.SQLUtils.joinLines;
 
 public class RecipeDao {
 
-    private final Connection connection;
+    private final DataSource dataSource;
     private final RowMapper<Recipe> recipeRowMapper;
 
     @Inject
-    public RecipeDao(Connection connection, RowMapper<Recipe> recipeRowMapper) {
-        this.connection = connection;
+    public RecipeDao(DataSource dataSource, RowMapper<Recipe> recipeRowMapper) {
+        this.dataSource = dataSource;
         this.recipeRowMapper = recipeRowMapper;
     }
 
@@ -31,7 +31,7 @@ public class RecipeDao {
                 "INSERT INTO Recipe (id, name)",
                 "     VALUES (UUID_SHORT(), '" + name + "')"
         );
-        Statement statement = connection.createStatement();
+        Statement statement =  dataSource.getConnection().createStatement();
         statement.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
         ResultSet rs = statement.getGeneratedKeys();
         rs.next();
@@ -49,7 +49,7 @@ public class RecipeDao {
                     "     VALUES (" + proportion.getKey() + ", " + recipeId + ", " + proportion.getValue() + ");"
             );
         }
-        connection.createStatement().executeUpdate(sql);
+        dataSource.getConnection().createStatement().executeUpdate(sql);
     }
 
     @SQLCall
@@ -69,7 +69,7 @@ public class RecipeDao {
                 "  FROM Recipe",
                 " WHERE id = " + recipeId
         );
-        connection.createStatement().executeUpdate(sql);
+        dataSource.getConnection().createStatement().executeUpdate(sql);
     }
 
     @SQLCall
@@ -78,7 +78,7 @@ public class RecipeDao {
                 "SELECT *",
                 "  FROM Recipe"
         );
-        return recipeRowMapper.mapAll(connection.createStatement().executeQuery(sql));
+        return recipeRowMapper.mapAll( dataSource.getConnection().createStatement().executeQuery(sql));
     }
 
     @SQLCall
@@ -90,7 +90,7 @@ public class RecipeDao {
                 "    ON iq.recipeId = r.id",
                 " WHERE iq.ingredientId = " + ingredientId
         );
-        return  recipeRowMapper.mapAll(connection.createStatement().executeQuery(sql));
+        return  recipeRowMapper.mapAll( dataSource.getConnection().createStatement().executeQuery(sql));
     }
 
     @SQLCall
@@ -102,7 +102,7 @@ public class RecipeDao {
                 "    ON rc.recipeId = r.id",
                 " WHERE rc.categoryId = " + categoryId
         );
-        return  recipeRowMapper.mapAll(connection.createStatement().executeQuery(sql));
+        return  recipeRowMapper.mapAll( dataSource.getConnection().createStatement().executeQuery(sql));
     }
 
 }

@@ -5,7 +5,7 @@ import dao.rowmapper.RowMapper;
 import model.Category;
 
 import javax.inject.Inject;
-import java.sql.Connection;
+import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -13,12 +13,12 @@ import static dao.SQLUtils.joinLines;
 
 public class CategoryDao {
 
-    private final Connection connection;
+    private final DataSource dataSource;
     private final RowMapper<Category> categoryRowMapper;
 
     @Inject
-    public CategoryDao(Connection connection, RowMapper<Category> categoryRowMapper) {
-        this.connection = connection;
+    public CategoryDao(DataSource dataSource, RowMapper<Category> categoryRowMapper) {
+        this.dataSource = dataSource;
         this.categoryRowMapper = categoryRowMapper;
     }
 
@@ -28,7 +28,7 @@ public class CategoryDao {
                 "INSERT INTO Category (id, name)",
                 "     VALUES (UUID_SHORT(), '" + name + "')"
         );
-        connection.createStatement().executeUpdate(sql);
+        dataSource.getConnection().createStatement().executeUpdate(sql);
     }
 
     @SQLCall
@@ -41,7 +41,7 @@ public class CategoryDao {
                 "  FROM RecipeCategory",
                 " WHERE categoryId = " + categoryId
         );
-        connection.createStatement().executeUpdate(sql);
+        dataSource.getConnection().createStatement().executeUpdate(sql);
     }
 
     @SQLCall
@@ -51,7 +51,7 @@ public class CategoryDao {
                 "  FROM Category",
                 " WHERE id = " + categoryId
         );
-        List<Category> categories = categoryRowMapper.mapAll(connection.createStatement().executeQuery(sql));
+        List<Category> categories = categoryRowMapper.mapAll( dataSource.getConnection().createStatement().executeQuery(sql));
         if (categories.size() > 1) {
             throw new RuntimeException("Found more than one result for id");
         }
@@ -68,7 +68,7 @@ public class CategoryDao {
         for (int i = 1; i < categoryIds.size(); i++) {
             sql += "\n    OR id = " + categoryIds.get(i);
         }
-        return categoryRowMapper.mapAll(connection.createStatement().executeQuery(sql));
+        return categoryRowMapper.mapAll( dataSource.getConnection().createStatement().executeQuery(sql));
     }
 
     @SQLCall
@@ -80,7 +80,7 @@ public class CategoryDao {
                 "    ON rc.categoryId = c.id",
                 " WHERE rc.recipeId = " + recipeId
         );
-        return categoryRowMapper.mapAll(connection.createStatement().executeQuery(sql));
+        return categoryRowMapper.mapAll( dataSource.getConnection().createStatement().executeQuery(sql));
     }
 
     @SQLCall
@@ -89,7 +89,7 @@ public class CategoryDao {
                 "SELECT *",
                 "  FROM Category"
         );
-        return categoryRowMapper.mapAll(connection.createStatement().executeQuery(sql));
+        return categoryRowMapper.mapAll( dataSource.getConnection().createStatement().executeQuery(sql));
     }
 
 }
