@@ -5,7 +5,7 @@ import dao.rowmapper.RowMapper;
 import model.Ingredient;
 
 import javax.inject.Inject;
-import java.sql.Connection;
+import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -16,12 +16,12 @@ import static dao.SQLUtils.joinLines;
 
 public class IngredientDao {
 
-    private final Connection connection;
+    private final DataSource dataSource;
     private final RowMapper<Ingredient> ingredientRowMapper;
 
     @Inject
-    public IngredientDao(Connection connection, RowMapper<Ingredient> ingredientRowMapper) {
-        this.connection = connection;
+    public IngredientDao(DataSource dataSource, RowMapper<Ingredient> ingredientRowMapper) {
+        this.dataSource = dataSource;
         this.ingredientRowMapper = ingredientRowMapper;
     }
 
@@ -31,7 +31,7 @@ public class IngredientDao {
                 "INSERT INTO Ingredient (id, name, inStock, price)",
                 "     VALUES (UUID_SHORT(), '" + name + "', TRUE, " + pricePerUnit + ")"
         );
-        connection.createStatement().executeUpdate(sql);
+        dataSource.getConnection().createStatement().executeUpdate(sql);
     }
 
     @SQLCall
@@ -56,7 +56,7 @@ public class IngredientDao {
                 "  FROM IngredientQuantity",
                 " WHERE ingredientId = " + ingredientId
         );
-        connection.createStatement().executeUpdate(sql);
+        dataSource.getConnection().createStatement().executeUpdate(sql);
     }
 
     @SQLCall
@@ -66,7 +66,7 @@ public class IngredientDao {
                 "    SET price = " + pricePerUnit,
                 "  WHERE id = " + ingredientId
         );
-        connection.createStatement().executeUpdate(sql);
+        dataSource.getConnection().createStatement().executeUpdate(sql);
     }
 
     @SQLCall
@@ -76,7 +76,7 @@ public class IngredientDao {
                 "    SET inStock = " + inStock,
                 "  WHERE id = " + ingredientId
         );
-        connection.createStatement().executeUpdate(sql);
+        dataSource.getConnection().createStatement().executeUpdate(sql);
     }
 
     @SQLCall
@@ -85,7 +85,7 @@ public class IngredientDao {
                 "SELECT *",
                 "  FROM Ingredient"
         );
-        return ingredientRowMapper.mapAll(connection.createStatement().executeQuery(sql));
+        return ingredientRowMapper.mapAll( dataSource.getConnection().createStatement().executeQuery(sql));
     }
 
     @SQLCall
@@ -95,7 +95,7 @@ public class IngredientDao {
                 "  FROM Ingredient",
                 " WHERE inStock = " + inStock
         );
-        return ingredientRowMapper.mapAll(connection.createStatement().executeQuery(sql));
+        return ingredientRowMapper.mapAll( dataSource.getConnection().createStatement().executeQuery(sql));
     }
 
     @SQLCall
@@ -105,7 +105,7 @@ public class IngredientDao {
                 "  FROM Ingredient",
                 " WHERE id = " + ingredientId
         );
-        List<Ingredient> ingredients = ingredientRowMapper.mapAll(connection.createStatement().executeQuery(sql));
+        List<Ingredient> ingredients = ingredientRowMapper.mapAll( dataSource.getConnection().createStatement().executeQuery(sql));
         if (ingredients.size() > 1) {
             throw new RuntimeException("Found more than one result for id");
         }
@@ -122,7 +122,7 @@ public class IngredientDao {
         for (int i = 1; i < ingredientIds.size(); i++) {
             sql += "\n    OR id = " + ingredientIds.get(i);
         }
-        return ingredientRowMapper.mapAll(connection.createStatement().executeQuery(sql));
+        return ingredientRowMapper.mapAll( dataSource.getConnection().createStatement().executeQuery(sql));
     }
 
     @SQLCall
@@ -134,7 +134,7 @@ public class IngredientDao {
                 "    ON i.id = iq.ingredientId",
                 " WHERE iq.recipeId = " + recipeId
         );
-        ResultSet rs = connection.createStatement().executeQuery(sql);
+        ResultSet rs =  dataSource.getConnection().createStatement().executeQuery(sql);
         Map<Ingredient, Double> quantities = new HashMap<>();
         while (rs.next()) {
             quantities.put(
