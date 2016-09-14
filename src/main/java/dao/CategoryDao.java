@@ -1,8 +1,10 @@
 package dao;
 
+import config.SQLCall;
 import dao.rowmapper.RowMapper;
 import model.Category;
 
+import javax.inject.Inject;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -14,11 +16,13 @@ public class CategoryDao {
     private final Connection connection;
     private final RowMapper<Category> categoryRowMapper;
 
+    @Inject
     public CategoryDao(Connection connection, RowMapper<Category> categoryRowMapper) {
         this.connection = connection;
         this.categoryRowMapper = categoryRowMapper;
     }
 
+    @SQLCall
     public void addCategory(String name) throws SQLException {
         String sql = joinLines(
                 "INSERT INTO Category (id, name)",
@@ -27,6 +31,7 @@ public class CategoryDao {
         connection.createStatement().executeUpdate(sql);
     }
 
+    @SQLCall
     public void removeCategory(Long categoryId) throws SQLException {
         String sql = joinLines(
                 "DELETE ",
@@ -39,6 +44,7 @@ public class CategoryDao {
         connection.createStatement().executeUpdate(sql);
     }
 
+    @SQLCall
     public Category getById(Long categoryId) throws SQLException {
         String sql = joinLines(
                 "SELECT *",
@@ -52,6 +58,7 @@ public class CategoryDao {
         return categories.get(0);
     }
 
+    @SQLCall
     public List<Category> getByIds(List<Long> categoryIds) throws SQLException {
         String sql = joinLines(
                 "SELECT *",
@@ -64,6 +71,7 @@ public class CategoryDao {
         return categoryRowMapper.mapAll(connection.createStatement().executeQuery(sql));
     }
 
+    @SQLCall
     public List<Category> getByRecipe(Long recipeId) throws SQLException {
         String sql = joinLines(
                 "SELECT *",
@@ -75,6 +83,7 @@ public class CategoryDao {
         return categoryRowMapper.mapAll(connection.createStatement().executeQuery(sql));
     }
 
+    @SQLCall
     public List<Category> getAllCategories() throws SQLException {
         String sql = joinLines(
                 "SELECT *",

@@ -4,6 +4,7 @@ import dao.CategoryDao;
 import dao.IngredientDao;
 import model.Recipe;
 
+import javax.inject.Inject;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -12,6 +13,7 @@ public class RecipeRowMapper extends RowMapper<Recipe> {
     private final CategoryDao categoryDao;
     private final IngredientDao ingredientDao;
 
+    @Inject
     public RecipeRowMapper(CategoryDao categoryDao, IngredientDao ingredientDao) {
         this.categoryDao = categoryDao;
         this.ingredientDao = ingredientDao;

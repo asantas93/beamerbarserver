@@ -1,8 +1,10 @@
 package dao;
 
+import config.SQLCall;
 import dao.rowmapper.RowMapper;
 import model.Recipe;
 
+import javax.inject.Inject;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,11 +19,13 @@ public class RecipeDao {
     private final Connection connection;
     private final RowMapper<Recipe> recipeRowMapper;
 
+    @Inject
     public RecipeDao(Connection connection, RowMapper<Recipe> recipeRowMapper) {
         this.connection = connection;
         this.recipeRowMapper = recipeRowMapper;
     }
 
+    @SQLCall
     public void addRecipe(String name, List<Long> categoryIds, Map<Long, Double> proportions) throws SQLException {
         String sql = joinLines(
                 "INSERT INTO Recipe (id, name)",
@@ -48,6 +52,7 @@ public class RecipeDao {
         connection.createStatement().executeUpdate(sql);
     }
 
+    @SQLCall
     public void removeRecipe(Long recipeId) throws SQLException {
         String sql = joinLines(
                 "DELETE rc",
@@ -67,6 +72,7 @@ public class RecipeDao {
         connection.createStatement().executeUpdate(sql);
     }
 
+    @SQLCall
     public List<Recipe> getAllRecipes() throws SQLException {
         String sql = joinLines(
                 "SELECT *",
@@ -75,6 +81,7 @@ public class RecipeDao {
         return recipeRowMapper.mapAll(connection.createStatement().executeQuery(sql));
     }
 
+    @SQLCall
     public List<Recipe> getAllRecipesWithIngredient(Long ingredientId) throws SQLException {
         String sql = joinLines(
                 "SELECT *",
@@ -86,6 +93,7 @@ public class RecipeDao {
         return  recipeRowMapper.mapAll(connection.createStatement().executeQuery(sql));
     }
 
+    @SQLCall
     public List<Recipe> getAllRecipesWithCategory(Long categoryId) throws SQLException {
         String sql = joinLines(
                 "SELECT *",

@@ -1,8 +1,10 @@
 package dao;
 
+import config.SQLCall;
 import dao.rowmapper.RowMapper;
 import model.Ingredient;
 
+import javax.inject.Inject;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,11 +19,13 @@ public class IngredientDao {
     private final Connection connection;
     private final RowMapper<Ingredient> ingredientRowMapper;
 
+    @Inject
     public IngredientDao(Connection connection, RowMapper<Ingredient> ingredientRowMapper) {
         this.connection = connection;
         this.ingredientRowMapper = ingredientRowMapper;
     }
 
+    @SQLCall
     public void addIngredient(String name, Double pricePerUnit) throws SQLException {
         String sql = joinLines(
                 "INSERT INTO Ingredient (id, name, inStock, price)",
@@ -30,6 +34,7 @@ public class IngredientDao {
         connection.createStatement().executeUpdate(sql);
     }
 
+    @SQLCall
     public void removeIngredient(Long ingredientId) throws SQLException {
         String sql = joinLines(
                 "DELETE rc ",
@@ -54,6 +59,7 @@ public class IngredientDao {
         connection.createStatement().executeUpdate(sql);
     }
 
+    @SQLCall
     public void setIngredientPrice(Long ingredientId, Double pricePerUnit) throws SQLException {
         String sql = joinLines(
                 "UPDATE Ingredient",
@@ -63,6 +69,7 @@ public class IngredientDao {
         connection.createStatement().executeUpdate(sql);
     }
 
+    @SQLCall
     public void setIngredientInStock(Long ingredientId, Boolean inStock) throws SQLException {
         String sql = joinLines(
                 "UPDATE Ingredient",
@@ -72,6 +79,7 @@ public class IngredientDao {
         connection.createStatement().executeUpdate(sql);
     }
 
+    @SQLCall
     public List<Ingredient> getAllIngredients() throws SQLException {
         String sql = joinLines(
                 "SELECT *",
@@ -80,6 +88,7 @@ public class IngredientDao {
         return ingredientRowMapper.mapAll(connection.createStatement().executeQuery(sql));
     }
 
+    @SQLCall
     public List<Ingredient> getIngredientsWithStock(Boolean inStock) throws SQLException {
         String sql = joinLines(
                 "SELECT *",
@@ -89,6 +98,7 @@ public class IngredientDao {
         return ingredientRowMapper.mapAll(connection.createStatement().executeQuery(sql));
     }
 
+    @SQLCall
     public Ingredient getById(Long ingredientId) throws SQLException {
         String sql = joinLines(
                 "SELECT *",
@@ -102,6 +112,7 @@ public class IngredientDao {
         return ingredients.get(0);
     }
 
+    @SQLCall
     public List<Ingredient> getByIds(List<Long> ingredientIds) throws SQLException {
         String sql = joinLines(
                 "SELECT *",
@@ -114,6 +125,7 @@ public class IngredientDao {
         return ingredientRowMapper.mapAll(connection.createStatement().executeQuery(sql));
     }
 
+    @SQLCall
     public Map<Ingredient, Double> getQuantitiesForRecipe(Long recipeId) throws SQLException {
         String sql = joinLines(
                 "SELECT *",
