@@ -27,7 +27,7 @@ public class IngredientDao {
                 "INSERT INTO Ingredient (id, name, inStock, price)",
                 "     VALUES (UUID_SHORT(), '" + name + "', TRUE, " + pricePerUnit + ")"
         );
-        connection.createStatement().execute(sql);
+        connection.createStatement().executeUpdate(sql);
     }
 
     public void removeIngredient(Long ingredientId) throws SQLException {
@@ -51,7 +51,7 @@ public class IngredientDao {
                 "  FROM IngredientQuantity",
                 " WHERE ingredientId = " + ingredientId
         );
-        connection.createStatement().execute(sql);
+        connection.createStatement().executeUpdate(sql);
     }
 
     public void setIngredientPrice(Long ingredientId, Double pricePerUnit) throws SQLException {
@@ -60,7 +60,7 @@ public class IngredientDao {
                 "    SET price = " + pricePerUnit,
                 "  WHERE id = " + ingredientId
         );
-        connection.createStatement().execute(sql);
+        connection.createStatement().executeUpdate(sql);
     }
 
     public void setIngredientInStock(Long ingredientId, Boolean inStock) throws SQLException {
@@ -69,7 +69,7 @@ public class IngredientDao {
                 "    SET inStock = " + inStock,
                 "  WHERE id = " + ingredientId
         );
-        connection.createStatement().execute(sql);
+        connection.createStatement().executeUpdate(sql);
     }
 
     public List<Ingredient> getAllIngredients() throws SQLException {

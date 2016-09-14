@@ -24,7 +24,7 @@ public class CategoryDao {
                 "INSERT INTO Category (id, name)",
                 "     VALUES (UUID_SHORT(), '" + name + "')"
         );
-        connection.createStatement().execute(sql);
+        connection.createStatement().executeUpdate(sql);
     }
 
     public void removeCategory(Long categoryId) throws SQLException {
@@ -36,7 +36,7 @@ public class CategoryDao {
                 "  FROM RecipeCategory",
                 " WHERE categoryId = " + categoryId
         );
-        connection.createStatement().execute(sql);
+        connection.createStatement().executeUpdate(sql);
     }
 
     public Category getById(Long categoryId) throws SQLException {

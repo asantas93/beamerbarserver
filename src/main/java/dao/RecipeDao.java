@@ -64,7 +64,7 @@ public class RecipeDao {
                 "  FROM Recipe",
                 " WHERE id = " + recipeId
         );
-        connection.createStatement().execute(sql);
+        connection.createStatement().executeUpdate(sql);
     }
 
     public List<Recipe> getAllRecipes() throws SQLException {
@@ -86,8 +86,15 @@ public class RecipeDao {
         return  recipeRowMapper.mapAll(connection.createStatement().executeQuery(sql));
     }
 
-    public List<Recipe> getAllRecipesWithCategory(Long categoryId) {
-        return null;
+    public List<Recipe> getAllRecipesWithCategory(Long categoryId) throws SQLException {
+        String sql = joinLines(
+                "SELECT *",
+                "  FROM Recipe r",
+                "  JOIN RecipeCategory rc",
+                "    ON rc.recipeId = r.id",
+                " WHERE rc.categoryId = " + categoryId
+        );
+        return  recipeRowMapper.mapAll(connection.createStatement().executeQuery(sql));
     }
 
 }
