@@ -3,11 +3,9 @@ package dao;
 import dao.rowmapper.RowMapper;
 import model.Ingredient;
 
-import javax.xml.transform.Result;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,47 +22,99 @@ public class IngredientDao {
         this.ingredientRowMapper = ingredientRowMapper;
     }
 
-    public void addIngredient(String name, Double pricePerUnit) {
-
+    public void addIngredient(String name, Double pricePerUnit) throws SQLException {
+        String sql = joinLines(
+                "INSERT INTO Ingredient (id, name, inStock, price)",
+                "     VALUES (UUID_SHORT(), '" + name + "', TRUE, " + pricePerUnit + ")"
+        );
+        connection.createStatement().execute(sql);
     }
 
-    public void removeIngredient(Long ingredientId) {
-
+    public void removeIngredient(Long ingredientId) throws SQLException {
+        String sql = joinLines(
+                "DELETE rc ",
+                "  FROM RecipeCategory rc",
+                "  JOIN Recipe r",
+                "    ON r.id = rc.recipeId",
+                "  JOIN IngredientQuantity iq",
+                "    ON r.id = iq.recipeId",
+                " WHERE iq.ingredientId = " + ingredientId + ";",
+                "DELETE r ",
+                "  FROM Recipe r",
+                "  JOIN IngredientQuantity iq",
+                "    ON r.id = iq.recipeId",
+                " WHERE iq.ingredientId = " + ingredientId + ";",
+                "DELETE ",
+                "  FROM Ingredient",
+                " WHERE id = " + ingredientId + ";",
+                "DELETE ",
+                "  FROM IngredientQuantity",
+                " WHERE ingredientId = " + ingredientId
+        );
+        connection.createStatement().execute(sql);
     }
 
-    public void setIngredientPrice(Long ingredientId, Double pricePerUnit) {
-
+    public void setIngredientPrice(Long ingredientId, Double pricePerUnit) throws SQLException {
+        String sql = joinLines(
+                "UPDATE Ingredient",
+                "    SET price = " + pricePerUnit,
+                "  WHERE id = " + ingredientId
+        );
+        connection.createStatement().execute(sql);
     }
 
-    public void setIngredientOutOfStock(Long ingredientId) {
-
+    public void setIngredientInStock(Long ingredientId, Boolean inStock) throws SQLException {
+        String sql = joinLines(
+                "UPDATE Ingredient",
+                "    SET inStock = " + inStock,
+                "  WHERE id = " + ingredientId
+        );
+        connection.createStatement().execute(sql);
     }
 
-    public void setIngredientInStock(Long ingredientId) {
-
+    public List<Ingredient> getAllIngredients() throws SQLException {
+        String sql = joinLines(
+                "SELECT *",
+                "  FROM Ingredient"
+        );
+        return ingredientRowMapper.mapAll(connection.createStatement().executeQuery(sql));
     }
 
-    public List<Ingredient> getAllIngredients() {
-        return null;
+    public List<Ingredient> getIngredientsWithStock(Boolean inStock) throws SQLException {
+        String sql = joinLines(
+                "SELECT *",
+                "  FROM Ingredient",
+                " WHERE inStock = " + inStock
+        );
+        return ingredientRowMapper.mapAll(connection.createStatement().executeQuery(sql));
     }
 
-    public List<Ingredient> getOutOfStockIngredients() {
-        return null;
+    public Ingredient getById(Long ingredientId) throws SQLException {
+        String sql = joinLines(
+                "SELECT *",
+                "  FROM Ingredient",
+                " WHERE id = " + ingredientId
+        );
+        List<Ingredient> ingredients = ingredientRowMapper.mapAll(connection.createStatement().executeQuery(sql));
+        if (ingredients.size() > 1) {
+            throw new RuntimeException("Found more than one result for id");
+        }
+        return ingredients.get(0);
     }
 
-    public List<Ingredient> getInStockIngredients() {
-        return null;
+    public List<Ingredient> getByIds(List<Long> ingredientIds) throws SQLException {
+        String sql = joinLines(
+                "SELECT *",
+                "  FROM Ingredient",
+                " WHERE id = " + ingredientIds.get(0)
+        );
+        for (int i = 1; i < ingredientIds.size(); i++) {
+            sql += "\n    OR id = " + ingredientIds.get(i);
+        }
+        return ingredientRowMapper.mapAll(connection.createStatement().executeQuery(sql));
     }
 
-    public Ingredient getById(Long ingedientId) {
-        return null;
-    }
-
-    public List<Ingredient> getByIds(List<Long> ingedientIds) {
-        return null;
-    }
-
-    public Map<Ingredient, Double> getQuantitiesForRecipe(Long recipeId) {
+    public Map<Ingredient, Double> getQuantitiesForRecipe(Long recipeId) throws SQLException {
         String sql = joinLines(
                 "SELECT *",
                 "  FROM Ingredient i",
@@ -72,20 +122,15 @@ public class IngredientDao {
                 "    ON i.id = iq.ingredientId",
                 " WHERE iq.recipeId = " + recipeId
         );
-        try {
-            Statement statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery(sql);
-            Map<Ingredient, Double> quantities = new HashMap<>();
-            while (rs.next()) {
-                quantities.put(
-                        ingredientRowMapper.mapRow(rs),
-                        rs.getDouble("quantity")
-                );
-            }
-            return quantities;
-        } catch (SQLException e) {
-            throw new RuntimeException(sql, e);
+        ResultSet rs = connection.createStatement().executeQuery(sql);
+        Map<Ingredient, Double> quantities = new HashMap<>();
+        while (rs.next()) {
+            quantities.put(
+                    ingredientRowMapper.mapRow(rs),
+                    rs.getDouble("quantity")
+            );
         }
+        return quantities;
     }
 
 }

@@ -5,7 +5,6 @@ import model.Category;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 
 import static dao.SQLUtils.joinLines;
@@ -20,54 +19,40 @@ public class CategoryDao {
         this.categoryRowMapper = categoryRowMapper;
     }
 
-    public void addCategory(String name) {
+    public void addCategory(String name) throws SQLException {
         String sql = joinLines(
                 "INSERT INTO Category (id, name)",
                 "     VALUES (UUID_SHORT(), '" + name + "')"
         );
-        try {
-            Statement statement = connection.createStatement();
-            statement.execute(sql);
-        } catch (SQLException e) {
-            throw new RuntimeException(sql, e);
-        }
+        connection.createStatement().execute(sql);
     }
 
-    public void removeCategory(Long categoryId) {
+    public void removeCategory(Long categoryId) throws SQLException {
         String sql = joinLines(
-                "DELETE FROM Category",
-                "      WHERE id = " + categoryId + ";",
-                "DELETE FROM RecipeCategory",
-                "      WHERE id = " + categoryId
+                "DELETE ",
+                "  FROM Category",
+                " WHERE id = " + categoryId + ";",
+                "DELETE ",
+                "  FROM RecipeCategory",
+                " WHERE categoryId = " + categoryId
         );
-        try {
-            Statement statement = connection.createStatement();
-            statement.execute(sql);
-        } catch (SQLException e) {
-            throw new RuntimeException(sql, e);
-        }
+        connection.createStatement().execute(sql);
     }
 
-    public Category getById(Long categoryId) {
+    public Category getById(Long categoryId) throws SQLException {
         String sql = joinLines(
                 "SELECT *",
                 "  FROM Category",
                 " WHERE id = " + categoryId
         );
-        List<Category> categories;
-        try {
-            Statement statement = connection.createStatement();
-            categories = categoryRowMapper.mapAll(statement.executeQuery(sql));
-            if (categories.size() > 1) {
-                throw new RuntimeException("Found more than one result for id");
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(sql, e);
+        List<Category> categories = categoryRowMapper.mapAll(connection.createStatement().executeQuery(sql));
+        if (categories.size() > 1) {
+            throw new RuntimeException("Found more than one result for id");
         }
-        return categories.get(1);
+        return categories.get(0);
     }
 
-    public List<Category> getByIds(List<Long> categoryIds) {
+    public List<Category> getByIds(List<Long> categoryIds) throws SQLException {
         String sql = joinLines(
                 "SELECT *",
                 "  FROM Category",
@@ -76,47 +61,26 @@ public class CategoryDao {
         for (int i = 1; i < categoryIds.size(); i++) {
             sql += "\n    OR id = " + categoryIds.get(i);
         }
-        List<Category> categories;
-        try {
-            Statement statement = connection.createStatement();
-            categories = categoryRowMapper.mapAll(statement.executeQuery(sql));
-        } catch (SQLException e) {
-            throw new RuntimeException(sql, e);
-        }
-        return categories;
+        return categoryRowMapper.mapAll(connection.createStatement().executeQuery(sql));
     }
 
-    public List<Category> getByRecipe(Long recipeId) {
+    public List<Category> getByRecipe(Long recipeId) throws SQLException {
         String sql = joinLines(
                 "SELECT *",
                 "  FROM Category c",
                 "  JOIN RecipeCategory rc",
-                "    ON rc.categoryid = c.id",
-                " WHERE rc.recipeid = " + recipeId
+                "    ON rc.categoryId = c.id",
+                " WHERE rc.recipeId = " + recipeId
         );
-        List<Category> categories;
-        try {
-            Statement statement = connection.createStatement();
-            categories = categoryRowMapper.mapAll(statement.executeQuery(sql));
-        } catch (SQLException e) {
-            throw new RuntimeException(sql, e);
-        }
-        return categories;
+        return categoryRowMapper.mapAll(connection.createStatement().executeQuery(sql));
     }
 
-    public List<Category> getAllCategories() {
+    public List<Category> getAllCategories() throws SQLException {
         String sql = joinLines(
                 "SELECT *",
                 "  FROM Category"
         );
-        List<Category> categories;
-        try {
-            Statement statement = connection.createStatement();
-            categories = categoryRowMapper.mapAll(statement.executeQuery(sql));
-        } catch (SQLException e) {
-            throw new RuntimeException(sql, e);
-        }
-        return categories;
+        return categoryRowMapper.mapAll(connection.createStatement().executeQuery(sql));
     }
 
 }
