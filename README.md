@@ -40,7 +40,7 @@ CREATE TABLE ingredientquantity(recipeid BIGINT, ingredientid BIGINT, quantity D
 Run this command upon cloning.
 
 ```
-git update-index --assume-unchanged src/main/resources/credentials
+git update-index --assume-unchanged src/main/resources/dblogin
 ```
 
 Then edit the file to provide your login info. Git shouldn't be tracking it at this point, so it's safe to run commands like `git commit -a`.
