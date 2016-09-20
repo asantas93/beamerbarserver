@@ -1,0 +1,6 @@
+# Add your database login info here. Never commit an update to this file.
+# Pound sign comments. Colon splits keys and values on a line.
+username: root
+password:
+database: beamerbar
+host: localhost
