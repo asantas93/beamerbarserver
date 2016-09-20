@@ -57,7 +57,7 @@ public class BarServerModule extends AbstractModule {
         JdbcDataSource dataSource = new JdbcDataSource();
         dataSource.setUser(credentials.get("user"));
         dataSource.setPassword(credentials.get("password"));
-        dataSource.setURL("jdbc:mysql://localhost/beamerbar");
+        dataSource.setURL("jdbc:mysql://" + credentials.get("host") + "/" + credentials.get("database"));
         return dataSource;
     }
 
