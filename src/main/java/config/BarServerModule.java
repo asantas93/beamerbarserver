@@ -42,7 +42,7 @@ public class BarServerModule extends AbstractModule {
         }
 
         HashMap<String, String> credentials = new HashMap<>();
-        try (Scanner scanner = new Scanner(new File("credentials"))) {
+        try (Scanner scanner = new Scanner(new File("dblogin"))) {
             while (scanner.hasNext()) {
                 String line = scanner.nextLine();
                 if (!line.trim().startsWith("#")) {
@@ -51,7 +51,7 @@ public class BarServerModule extends AbstractModule {
                 }
             }
         } catch (FileNotFoundException e) {
-            throw new RuntimeException("File 'credentials' is missing. Can't log in.");
+            throw new RuntimeException("File 'dblogin' is missing. Can't log in.");
         }
 
         JdbcDataSource dataSource = new JdbcDataSource();
