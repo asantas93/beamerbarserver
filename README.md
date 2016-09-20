@@ -43,4 +43,4 @@ Run this command upon cloning.
 git update-index --assume-unchanged src/main/resources/dblogin
 ```
 
-Then edit the file to provide your login info. Git shouldn't be tracking it at this point, so it's safe to run commands like `git commit -a`.
+Now this file is safe to edit without accidentally putting your login info on GitHub. Fill in the password field with whatever user you want to use the database as (default is root).
