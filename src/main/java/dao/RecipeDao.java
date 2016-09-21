@@ -1,108 +1,142 @@
 package dao;
 
-import config.SQLCall;
 import dao.rowmapper.RowMapper;
 import model.Recipe;
 
 import javax.inject.Inject;
-import javax.sql.DataSource;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static dao.SQLUtils.joinLines;
 
 public class RecipeDao {
 
-    private final DataSource dataSource;
+    private final Connection connection;
     private final RowMapper<Recipe> recipeRowMapper;
 
     @Inject
-    public RecipeDao(DataSource dataSource, RowMapper<Recipe> recipeRowMapper) {
-        this.dataSource = dataSource;
+    public RecipeDao(Connection connection, RowMapper<Recipe> recipeRowMapper) {
+        this.connection = connection;
         this.recipeRowMapper = recipeRowMapper;
     }
 
-    @SQLCall
-    public void addRecipe(String name, List<Long> categoryIds, Map<Long, Double> proportions) throws SQLException {
+    public void addRecipe(String name, Set<Long> categoryIds, Map<Long, Double> proportions, String directions) {
         String sql = joinLines(
-                "INSERT INTO Recipe (id, name)",
-                "     VALUES (UUID_SHORT(), '" + name + "')"
+                "INSERT INTO Recipe (id, name, directions)",
+                "     VALUES (?, ?, ?)"
         );
-        Statement statement =  dataSource.getConnection().createStatement();
-        statement.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
-        ResultSet rs = statement.getGeneratedKeys();
-        rs.next();
-        Long recipeId = rs.getLong("id");
-        sql = "";
-        for (Long categoryId : categoryIds) {
-            sql += joinLines(
-                    "INSERT INTO RecipeCategory (recipeId, categoryId)",
-                    "     VALUES (" + recipeId + ", " + categoryId + ");"
-            );
+        try {
+
+            ResultSet rs = connection.createStatement().executeQuery("SELECT UUID_SHORT()");
+            rs.next();
+            Long recipeId = rs.getLong(1);
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setLong(1, recipeId);
+            statement.setString(2, name);
+            statement.setString(3, directions);
+            statement.executeUpdate();
+
+            for (Long categoryId : categoryIds) {
+                sql = joinLines(
+                        "INSERT INTO RecipeCategory (recipeId, categoryId)",
+                        "     VALUES (?, ?)"
+                );
+                statement = connection.prepareStatement(sql);
+                statement.setLong(1, recipeId);
+                statement.setLong(2, categoryId);
+                statement.executeUpdate();
+            }
+            for (Map.Entry<Long, Double> entry : proportions.entrySet()) {
+                sql = joinLines(
+                        "INSERT INTO IngredientQuantity (ingredientId, recipeId, quantity)",
+                        "     VALUES (?, ?, ?)"
+                );
+                statement = connection.prepareStatement(sql);
+                statement.setLong(1, entry.getKey());
+                statement.setLong(2, recipeId);
+                statement.setDouble(3, entry.getValue());
+                statement.executeUpdate();
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(sql, e);
         }
-        for (Map.Entry<Long, Double> proportion : proportions.entrySet()) {
-            sql += joinLines(
-                    "INSERT INTO IngredientQuantity (ingredientId, recipeId, quantity)",
-                    "     VALUES (" + proportion.getKey() + ", " + recipeId + ", " + proportion.getValue() + ");"
-            );
-        }
-        dataSource.getConnection().createStatement().executeUpdate(sql);
     }
 
-    @SQLCall
-    public void removeRecipe(Long recipeId) throws SQLException {
+    public void removeRecipe(Long recipeId) {
         String sql = joinLines(
                 "DELETE rc",
                 "  FROM RecipeCategory rc",
                 "  JOIN Recipe r",
                 "    ON rc.recipeId = r.id",
-                " WHERE r.id = " + recipeId + ";",
+                " WHERE r.id = ?;",
                 "DELETE iq",
                 "  FROM IngredientQuantity iq",
                 "  JOIN Recipe r",
                 "    ON r.id = iq.recipeId",
-                " WHERE r.id = " + recipeId + ";",
+                " WHERE r.id = ?;",
                 "DELETE ",
                 "  FROM Recipe",
-                " WHERE id = " + recipeId
+                " WHERE id = ?"
         );
-        dataSource.getConnection().createStatement().executeUpdate(sql);
+        try {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setLong(1, recipeId);
+            statement.setLong(2, recipeId);
+            statement.setLong(3, recipeId);
+            statement.executeUpdate(sql);
+        } catch (SQLException e) {
+            throw new RuntimeException(sql, e);
+        }
     }
 
-    @SQLCall
-    public List<Recipe> getAllRecipes() throws SQLException {
+    public List<Recipe> getAllRecipes() {
         String sql = joinLines(
                 "SELECT *",
                 "  FROM Recipe"
         );
-        return recipeRowMapper.mapAll( dataSource.getConnection().createStatement().executeQuery(sql));
+        try {
+            return recipeRowMapper.mapAll(connection.createStatement().executeQuery(sql));
+        } catch (SQLException e) {
+            throw new RuntimeException(sql, e);
+        }
     }
 
-    @SQLCall
-    public List<Recipe> getAllRecipesWithIngredient(Long ingredientId) throws SQLException {
+    public List<Recipe> getAllRecipesWithIngredient(Long ingredientId) {
         String sql = joinLines(
                 "SELECT *",
                 "  FROM Recipe r",
                 "  JOIN IngredientQuantity iq",
                 "    ON iq.recipeId = r.id",
-                " WHERE iq.ingredientId = " + ingredientId
+                " WHERE iq.ingredientId = ?"
         );
-        return  recipeRowMapper.mapAll( dataSource.getConnection().createStatement().executeQuery(sql));
+        try {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setLong(1, ingredientId);
+            return  recipeRowMapper.mapAll(statement.executeQuery(sql));
+        } catch (SQLException e) {
+            throw new RuntimeException(sql, e);
+        }
     }
 
-    @SQLCall
-    public List<Recipe> getAllRecipesWithCategory(Long categoryId) throws SQLException {
+    public List<Recipe> getAllRecipesWithCategory(Long categoryId) {
         String sql = joinLines(
                 "SELECT *",
                 "  FROM Recipe r",
                 "  JOIN RecipeCategory rc",
                 "    ON rc.recipeId = r.id",
-                " WHERE rc.categoryId = " + categoryId
+                " WHERE rc.categoryId = ?"
         );
-        return  recipeRowMapper.mapAll( dataSource.getConnection().createStatement().executeQuery(sql));
+        try {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setLong(1, categoryId);
+            return recipeRowMapper.mapAll(statement.executeQuery(sql));
+        } catch (SQLException e) {
+            throw new RuntimeException(sql, e);
+        }
     }
 
 }

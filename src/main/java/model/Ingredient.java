@@ -5,9 +5,9 @@ public class Ingredient {
     private final Long id;
     private final String name;
     private final Boolean inStock;
-    private final Double pricePerUnit;
+    private final Integer pricePerUnit;
 
-    public Ingredient(Long id, String name, Boolean inStock, Double pricePerUnit) {
+    public Ingredient(Long id, String name, Boolean inStock, Integer pricePerUnit) {
         this.id = id;
         this.name = name;
         this.inStock = inStock;

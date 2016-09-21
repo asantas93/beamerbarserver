@@ -26,7 +26,8 @@ public class RecipeRowMapper extends RowMapper<Recipe> {
                 id,
                 rs.getString("name"),
                 categoryDao.getByRecipe(id),
-                ingredientDao.getQuantitiesForRecipe(id)
+                ingredientDao.getQuantitiesForRecipe(id),
+                rs.getString("directions")
         );
     }
 

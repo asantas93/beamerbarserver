@@ -10,7 +10,7 @@ public abstract class RowMapper<T> {
     public List<T> mapAll(ResultSet rs) throws SQLException {
         List<T> results = new ArrayList<>();
         while (rs.next()) {
-            mapRow(rs);
+            results.add(mapRow(rs));
         }
         return results;
     }

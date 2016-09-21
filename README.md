@@ -18,21 +18,21 @@ Now enter the MySQL shell with the root user.
 mysql -u root -p
 ```
 
-Create the database and start using it. Mine will be named `beamerbar`. 
+Create the database and start using it. Mine will be named `BeamerBar`. 
 
 ```
-CREATE DATABASE beamerbar;
-USE beamerbar;
+CREATE DATABASE BeamerBar;
+USE BeamerBar;
 ```
 
 Create all the tables we need for the queries in the DAOs to work.
 
 ```
-CREATE TABLE category(id BIGINT, name VARCHAR(20));
-CREATE TABLE recipe(id BIGINT, name VARCHAR(20));
-CREATE TABLE ingredient(id BIGINT, name VARCHAR(20), price SMALLINT, instock BOOL);
-CREATE TABLE recipecategory(recipeid BIGINT, categoryid BIGINT);
-CREATE TABLE ingredientquantity(recipeid BIGINT, ingredientid BIGINT, quantity DOUBLE(4,2));
+CREATE TABLE Category(id BIGINT, name VARCHAR(40));
+CREATE TABLE Recipe(id BIGINT, name VARCHAR(40), directions TEXT);
+CREATE TABLE Ingredient(id BIGINT, name VARCHAR(40), price SMALLINT, inStock BOOL);
+CREATE TABLE RecipeCategory(recipeId BIGINT, categoryId BIGINT);
+CREATE TABLE IngredientQuantity(recipeId BIGINT, ingredientId BIGINT, quantity DOUBLE(4,2));
 ```
 
 ### Setting up server to connect to database

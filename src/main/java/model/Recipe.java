@@ -13,8 +13,16 @@ public class Recipe {
     private final List<Ingredient> outOfStockIngredients;
     private final List<Category> categories;
     private final Boolean allIngredientsInStock;
+    private final String directions;
 
-    public Recipe(Long id, String name, List<Category> categories, Map<Ingredient, Double> proportions) {
+    public Recipe(
+            Long id,
+            String name,
+            List<Category> categories,
+            Map<Ingredient,
+                    Double> proportions,
+            String directions
+    ) {
         this.id = id;
         this.name = name;
         this.proportions = proportions;
@@ -30,6 +38,7 @@ public class Recipe {
         }
         this.price = cumulativePrice;
         this.allIngredientsInStock = outOfStockIngredients.isEmpty();
+        this.directions = directions;
     }
 
     public Long getId() {
@@ -60,6 +69,10 @@ public class Recipe {
         return allIngredientsInStock;
     }
 
+    public String getDirections() {
+        return directions;
+    }
+
     @Override
     public boolean equals(Object other) {
         return other instanceof Recipe && ((Recipe) other).id.equals(this.id);
@@ -69,5 +82,4 @@ public class Recipe {
     public int hashCode() {
         return id.hashCode();
     }
-
 }

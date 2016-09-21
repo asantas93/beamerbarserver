@@ -13,7 +13,7 @@ public class IngredientRowMapper extends RowMapper<Ingredient> {
                 rs.getLong("id"),
                 rs.getString("name"),
                 rs.getBoolean("instock"),
-                rs.getDouble("price")
+                rs.getInt("price")
         );
     }
 
