@@ -40,15 +40,19 @@ public class CategoryDao {
         String sql = joinLines(
                 "DELETE ",
                 "  FROM Category",
-                " WHERE id = ?;",
-                "DELETE ",
-                "  FROM RecipeCategory",
-                " WHERE categoryId = ?"
+                " WHERE id = ?"
         );
         try {
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setLong(1, categoryId);
-            statement.setLong(2, categoryId);
+            statement.executeUpdate();
+            sql = joinLines(
+                    "DELETE ",
+                    "  FROM RecipeCategory",
+                    " WHERE categoryId = ?"
+            );
+            statement = connection.prepareStatement(sql);
+            statement.setLong(1, categoryId);
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(sql, e);
@@ -64,7 +68,7 @@ public class CategoryDao {
         try {
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setLong(1, categoryId);
-            List<Category> categories = categoryRowMapper.mapAll( connection.createStatement().executeQuery(sql));
+            List<Category> categories = categoryRowMapper.mapAll(statement.executeQuery());
             if (categories.size() > 1) {
                 throw new RuntimeException("Found more than one result for id");
             }
@@ -88,7 +92,7 @@ public class CategoryDao {
             for (int i = 0; i < categoryIds.size(); i++) {
                 statement.setLong(i + 1, categoryIds.get(i));
             }
-            return categoryRowMapper.mapAll(statement.executeQuery(sql));
+            return categoryRowMapper.mapAll(statement.executeQuery());
         } catch (SQLException e) {
             throw new RuntimeException(sql, e);
         }
@@ -100,10 +104,11 @@ public class CategoryDao {
                 "  FROM Category c",
                 "  JOIN RecipeCategory rc",
                 "    ON rc.categoryId = c.id",
-                " WHERE rc.recipeId = " + recipeId
+                " WHERE rc.recipeId = ?"
         );
         try {
             PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setLong(1, recipeId);
             return categoryRowMapper.mapAll(statement.executeQuery());
         } catch (SQLException e) {
             throw new RuntimeException(sql, e);

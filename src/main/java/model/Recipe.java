@@ -19,8 +19,7 @@ public class Recipe {
             Long id,
             String name,
             List<Category> categories,
-            Map<Ingredient,
-                    Double> proportions,
+            Map<Ingredient, Double> proportions,
             String directions
     ) {
         this.id = id;

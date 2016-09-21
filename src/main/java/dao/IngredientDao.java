@@ -4,8 +4,10 @@ import dao.rowmapper.RowMapper;
 import model.Ingredient;
 
 import javax.inject.Inject;
-import javax.sql.DataSource;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,41 +46,56 @@ public class IngredientDao {
                 "  FROM RecipeCategory rc",
                 "  JOIN Recipe r",
                 "    ON r.id = rc.recipeId",
-                "  JOIN IngredientQuantity iq",
-                "    ON r.id = iq.recipeId",
-                " WHERE iq.ingredientId = ?;",
-                "DELETE r ",
-                "  FROM Recipe r",
-                "  JOIN IngredientQuantity iq",
-                "    ON r.id = iq.recipeId",
-                " WHERE iq.ingredientId = ?;",
-                "DELETE ",
-                "  FROM Ingredient",
-                " WHERE id = ?;",
-                "DELETE ",
-                "  FROM IngredientQuantity",
-                " WHERE ingredientId = ?"
+                "  JOIN RecipeProportion rp",
+                "    ON r.id = rp.recipeId",
+                " WHERE rp.ingredientId = ?"
         );
         try {
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setLong(1, ingredientId);
-            statement.setLong(2, ingredientId);
-            statement.setLong(3, ingredientId);
-            statement.setLong(4, ingredientId);
-            statement.executeUpdate(sql);
+            statement.executeUpdate();
+            sql = joinLines(
+                    "DELETE r ",
+                    "  FROM Recipe r",
+                    "  JOIN RecipeProportion rp",
+                    "    ON r.id = rp.recipeId",
+                    " WHERE rp.ingredientId = ?"
+            );
+            statement = connection.prepareStatement(sql);
+            statement.setLong(1, ingredientId);
+            statement.executeUpdate();
+            sql = joinLines(
+                    "DELETE ",
+                    "  FROM Ingredient",
+                    " WHERE id = ?"
+            );
+            statement = connection.prepareStatement(sql);
+            statement.setLong(1, ingredientId);
+            statement.executeUpdate();
+            sql = joinLines(
+                    "DELETE ",
+                    "  FROM RecipeProportion",
+                    " WHERE ingredientId = ?"
+            );
+            statement = connection.prepareStatement(sql);
+            statement.setLong(1, ingredientId);
+            statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(sql, e);
         }
     }
 
-    public void setIngredientPrice(Long ingredientId, Double pricePerUnit) {
+    public void setIngredientPrice(Long ingredientId, Integer pricePerUnit) {
         String sql = joinLines(
                 "UPDATE Ingredient",
-                "    SET price = " + pricePerUnit,
-                "  WHERE id = " + ingredientId
+                "    SET price = ?",
+                "  WHERE id = ?"
         );
         try {
-            connection.createStatement().executeUpdate(sql);
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, pricePerUnit);
+            statement.setLong(2, ingredientId);
+            statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(sql, e);
         }
@@ -87,11 +104,14 @@ public class IngredientDao {
     public void setIngredientInStock(Long ingredientId, Boolean inStock) {
         String sql = joinLines(
                 "UPDATE Ingredient",
-                "    SET inStock = " + inStock,
-                "  WHERE id = " + ingredientId
+                "    SET inStock = ?",
+                "  WHERE id = ?"
         );
         try {
-            connection.createStatement().executeUpdate(sql);
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setBoolean(1, inStock);
+            statement.setLong(2, ingredientId);
+            statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(sql, e);
         }
@@ -113,10 +133,12 @@ public class IngredientDao {
         String sql = joinLines(
                 "SELECT *",
                 "  FROM Ingredient",
-                " WHERE inStock = " + inStock
+                " WHERE inStock = ?"
         );
         try {
-            return ingredientRowMapper.mapAll(connection.createStatement().executeQuery(sql));
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setBoolean(1, inStock);
+            return ingredientRowMapper.mapAll(statement.executeQuery());
         } catch (SQLException e) {
             throw new RuntimeException(sql, e);
         }
@@ -126,13 +148,13 @@ public class IngredientDao {
         String sql = joinLines(
                 "SELECT *",
                 "  FROM Ingredient",
-                " WHERE id = " + ingredientId
+                " WHERE id = ?"
         );
         List<Ingredient> ingredients;
         try {
-             ingredients = ingredientRowMapper.mapAll(
-                    connection.createStatement().executeQuery(sql)
-            );
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setLong(1, ingredientId);
+            ingredients = ingredientRowMapper.mapAll(statement.executeQuery());
         } catch (SQLException e) {
             throw new RuntimeException(sql, e);
         }
@@ -146,13 +168,17 @@ public class IngredientDao {
         String sql = joinLines(
                 "SELECT *",
                 "  FROM Ingredient",
-                " WHERE id = " + ingredientIds.get(0)
+                " WHERE id = ?"
         );
         for (int i = 1; i < ingredientIds.size(); i++) {
-            sql += "\n    OR id = " + ingredientIds.get(i);
+            sql += "\n    OR id = ?";
         }
         try {
-            return ingredientRowMapper.mapAll(connection.createStatement().executeQuery(sql));
+            PreparedStatement statement = connection.prepareStatement(sql);
+            for (int i = 0; i < ingredientIds.size(); i++) {
+                statement.setLong(i + 1, ingredientIds.get(i));
+            }
+            return ingredientRowMapper.mapAll(statement.executeQuery());
         } catch (SQLException e) {
             throw new RuntimeException(sql, e);
         }
@@ -162,13 +188,14 @@ public class IngredientDao {
         String sql = joinLines(
                 "SELECT *",
                 "  FROM Ingredient i",
-                "  JOIN IngredientQuantity iq",
-                "    ON i.id = iq.ingredientId",
-                " WHERE iq.recipeId = " + recipeId
+                "  JOIN RecipeProportion rp",
+                "    ON i.id = rp.ingredientId",
+                " WHERE rp.recipeId = ?"
         );
-        ResultSet rs;
         try {
-            rs =  connection.createStatement().executeQuery(sql);
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setLong(1, recipeId);
+            ResultSet rs =  statement.executeQuery();
             Map<Ingredient, Double> quantities = new HashMap<>();
             while (rs.next()) {
                 quantities.put(

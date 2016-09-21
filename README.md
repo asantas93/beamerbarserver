@@ -32,7 +32,7 @@ CREATE TABLE Category(id BIGINT, name VARCHAR(40));
 CREATE TABLE Recipe(id BIGINT, name VARCHAR(40), directions TEXT);
 CREATE TABLE Ingredient(id BIGINT, name VARCHAR(40), price SMALLINT, inStock BOOL);
 CREATE TABLE RecipeCategory(recipeId BIGINT, categoryId BIGINT);
-CREATE TABLE IngredientQuantity(recipeId BIGINT, ingredientId BIGINT, quantity DOUBLE(4,2));
+CREATE TABLE RecipeProportion(recipeId BIGINT, ingredientId BIGINT, quantity DOUBLE(4,2));
 ```
 
 ### Setting up server to connect to database
