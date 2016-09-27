@@ -4,6 +4,7 @@ import dao.rowmapper.RowMapper;
 import model.Ingredient;
 
 import javax.inject.Inject;
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -16,12 +17,12 @@ import static dao.SQLUtils.joinLines;
 
 public class IngredientDao {
 
-    private final Connection connection;
+    private final DataSource dataSource;
     private final RowMapper<Ingredient> ingredientRowMapper;
 
     @Inject
-    public IngredientDao(Connection connection, RowMapper<Ingredient> ingredientRowMapper) {
-        this.connection = connection;
+    public IngredientDao(DataSource dataSource, RowMapper<Ingredient> ingredientRowMapper) {
+        this.dataSource = dataSource;
         this.ingredientRowMapper = ingredientRowMapper;
     }
 
@@ -31,7 +32,7 @@ public class IngredientDao {
                 "     VALUES (UUID_SHORT(), ?, TRUE, ?)"
         );
         try {
-            PreparedStatement statement = connection.prepareStatement(sql);
+            PreparedStatement statement = dataSource.getConnection().prepareStatement(sql);
             statement.setString(1, name);
             statement.setInt(2, pricePerUnit);
             statement.executeUpdate();
@@ -51,6 +52,7 @@ public class IngredientDao {
                 " WHERE rp.ingredientId = ?"
         );
         try {
+            Connection connection = dataSource.getConnection();
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setLong(1, ingredientId);
             statement.executeUpdate();
@@ -92,7 +94,7 @@ public class IngredientDao {
                 "  WHERE id = ?"
         );
         try {
-            PreparedStatement statement = connection.prepareStatement(sql);
+            PreparedStatement statement = dataSource.getConnection().prepareStatement(sql);
             statement.setInt(1, pricePerUnit);
             statement.setLong(2, ingredientId);
             statement.executeUpdate();
@@ -108,7 +110,7 @@ public class IngredientDao {
                 "  WHERE id = ?"
         );
         try {
-            PreparedStatement statement = connection.prepareStatement(sql);
+            PreparedStatement statement = dataSource.getConnection().prepareStatement(sql);
             statement.setBoolean(1, inStock);
             statement.setLong(2, ingredientId);
             statement.executeUpdate();
@@ -123,7 +125,7 @@ public class IngredientDao {
                 "  FROM Ingredient"
         );
         try {
-            return ingredientRowMapper.mapAll(connection.createStatement().executeQuery(sql));            
+            return ingredientRowMapper.mapAll(dataSource.getConnection().createStatement().executeQuery(sql));
         } catch (SQLException e) {
             throw new RuntimeException(sql, e);            
         }
@@ -136,7 +138,7 @@ public class IngredientDao {
                 " WHERE inStock = ?"
         );
         try {
-            PreparedStatement statement = connection.prepareStatement(sql);
+            PreparedStatement statement = dataSource.getConnection().prepareStatement(sql);
             statement.setBoolean(1, inStock);
             return ingredientRowMapper.mapAll(statement.executeQuery());
         } catch (SQLException e) {
@@ -152,7 +154,7 @@ public class IngredientDao {
         );
         List<Ingredient> ingredients;
         try {
-            PreparedStatement statement = connection.prepareStatement(sql);
+            PreparedStatement statement = dataSource.getConnection().prepareStatement(sql);
             statement.setLong(1, ingredientId);
             ingredients = ingredientRowMapper.mapAll(statement.executeQuery());
         } catch (SQLException e) {
@@ -174,7 +176,7 @@ public class IngredientDao {
             sql += "\n    OR id = ?";
         }
         try {
-            PreparedStatement statement = connection.prepareStatement(sql);
+            PreparedStatement statement = dataSource.getConnection().prepareStatement(sql);
             for (int i = 0; i < ingredientIds.size(); i++) {
                 statement.setLong(i + 1, ingredientIds.get(i));
             }
@@ -193,7 +195,7 @@ public class IngredientDao {
                 " WHERE rp.recipeId = ?"
         );
         try {
-            PreparedStatement statement = connection.prepareStatement(sql);
+            PreparedStatement statement = dataSource.getConnection().prepareStatement(sql);
             statement.setLong(1, recipeId);
             ResultSet rs =  statement.executeQuery();
             Map<Ingredient, Double> quantities = new HashMap<>();

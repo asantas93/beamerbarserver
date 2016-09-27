@@ -13,6 +13,7 @@ import model.Category;
 import model.Ingredient;
 import model.Recipe;
 
+import javax.sql.DataSource;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.sql.Connection;
@@ -31,7 +32,7 @@ public class BarServerModule extends AbstractModule {
 
     @Provides
     @Singleton
-    MysqlConnectionPoolDataSource provideDataSource() {
+    DataSource provideDataSource() {
         try {
             Class.forName("com.mysql.jdbc.Driver").newInstance();
         } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
@@ -57,15 +58,6 @@ public class BarServerModule extends AbstractModule {
         dataSource.setPassword(credentials.get("password"));
         dataSource.setURL("jdbc:mysql://" + credentials.get("host") + ":3306/" + credentials.get("database"));
         return dataSource;
-    }
-
-    @Provides
-    Connection provideConnection(MysqlConnectionPoolDataSource dataSource) {
-        try {
-            return dataSource.getPooledConnection().getConnection();
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to get pooled connection.", e);
-        }
     }
 
 }

@@ -4,6 +4,7 @@ import dao.rowmapper.RowMapper;
 import model.Recipe;
 
 import javax.inject.Inject;
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -16,12 +17,12 @@ import static dao.SQLUtils.joinLines;
 
 public class RecipeDao {
 
-    private final Connection connection;
+    private final DataSource dataSource;
     private final RowMapper<Recipe> recipeRowMapper;
 
     @Inject
-    public RecipeDao(Connection connection, RowMapper<Recipe> recipeRowMapper) {
-        this.connection = connection;
+    public RecipeDao(DataSource dataSource, RowMapper<Recipe> recipeRowMapper) {
+        this.dataSource = dataSource;
         this.recipeRowMapper = recipeRowMapper;
     }
 
@@ -31,6 +32,8 @@ public class RecipeDao {
                 "     VALUES (?, ?, ?)"
         );
         try {
+
+            Connection connection = dataSource.getConnection();
 
             ResultSet rs = connection.createStatement().executeQuery("SELECT UUID_SHORT()");
             rs.next();
@@ -77,6 +80,7 @@ public class RecipeDao {
                 " WHERE r.id = ?"
         );
         try {
+            Connection connection = dataSource.getConnection();
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setLong(1, recipeId);
             statement.executeUpdate();
@@ -109,7 +113,7 @@ public class RecipeDao {
                 "  FROM Recipe"
         );
         try {
-            return recipeRowMapper.mapAll(connection.createStatement().executeQuery(sql));
+            return recipeRowMapper.mapAll(dataSource.getConnection().createStatement().executeQuery(sql));
         } catch (SQLException e) {
             throw new RuntimeException(sql, e);
         }
@@ -124,7 +128,7 @@ public class RecipeDao {
                 " WHERE rp.ingredientId = ?"
         );
         try {
-            PreparedStatement statement = connection.prepareStatement(sql);
+            PreparedStatement statement = dataSource.getConnection().prepareStatement(sql);
             statement.setLong(1, ingredientId);
             return  recipeRowMapper.mapAll(statement.executeQuery());
         } catch (SQLException e) {
@@ -141,7 +145,7 @@ public class RecipeDao {
                 " WHERE rc.categoryId = ?"
         );
         try {
-            PreparedStatement statement = connection.prepareStatement(sql);
+            PreparedStatement statement = dataSource.getConnection().prepareStatement(sql);
             statement.setLong(1, categoryId);
             return recipeRowMapper.mapAll(statement.executeQuery());
         } catch (SQLException e) {

@@ -4,6 +4,7 @@ import dao.rowmapper.RowMapper;
 import model.Category;
 
 import javax.inject.Inject;
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -13,12 +14,12 @@ import static dao.SQLUtils.joinLines;
 
 public class CategoryDao {
 
-    private final Connection connection;
+    private final DataSource dataSource;
     private final RowMapper<Category> categoryRowMapper;
 
     @Inject
-    public CategoryDao(Connection connection, RowMapper<Category> categoryRowMapper) {
-        this.connection = connection;
+    public CategoryDao(DataSource dataSource, RowMapper<Category> categoryRowMapper) {
+        this.dataSource = dataSource;
         this.categoryRowMapper = categoryRowMapper;
     }
 
@@ -28,7 +29,7 @@ public class CategoryDao {
                 "     VALUES (UUID_SHORT(), ?)"
         );
         try {
-            PreparedStatement statement = connection.prepareStatement(sql);
+            PreparedStatement statement = dataSource.getConnection().prepareStatement(sql);
             statement.setString(1, name);
             statement.executeUpdate();
         } catch (SQLException e) {
@@ -43,6 +44,7 @@ public class CategoryDao {
                 " WHERE id = ?"
         );
         try {
+            Connection connection = dataSource.getConnection();
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setLong(1, categoryId);
             statement.executeUpdate();
@@ -66,7 +68,7 @@ public class CategoryDao {
                 " WHERE id = ?"
         );
         try {
-            PreparedStatement statement = connection.prepareStatement(sql);
+            PreparedStatement statement = dataSource.getConnection().prepareStatement(sql);
             statement.setLong(1, categoryId);
             List<Category> categories = categoryRowMapper.mapAll(statement.executeQuery());
             if (categories.size() > 1) {
@@ -88,7 +90,7 @@ public class CategoryDao {
             sql += "\n    OR id = ?";
         }
         try {
-            PreparedStatement statement = connection.prepareStatement(sql);
+            PreparedStatement statement = dataSource.getConnection().prepareStatement(sql);
             for (int i = 0; i < categoryIds.size(); i++) {
                 statement.setLong(i + 1, categoryIds.get(i));
             }
@@ -107,7 +109,7 @@ public class CategoryDao {
                 " WHERE rc.recipeId = ?"
         );
         try {
-            PreparedStatement statement = connection.prepareStatement(sql);
+            PreparedStatement statement = dataSource.getConnection().prepareStatement(sql);
             statement.setLong(1, recipeId);
             return categoryRowMapper.mapAll(statement.executeQuery());
         } catch (SQLException e) {
@@ -121,7 +123,7 @@ public class CategoryDao {
                 "  FROM Category"
         );
         try {
-            return categoryRowMapper.mapAll(connection.createStatement().executeQuery(sql));
+            return categoryRowMapper.mapAll(dataSource.getConnection().createStatement().executeQuery(sql));
         } catch (SQLException e) {
             throw new RuntimeException(sql, e);
         }
